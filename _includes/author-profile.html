@@ -1,7 +1,7 @@
 {% if page.author and site.data.authors[page.author] %}
   {% assign author = site.data.authors[page.author] %}
 {% else %}
-  {% assign author = site.author %}
+ {% assign author = site.author %}
 {% endif %}
 
 <div itemscope itemtype="http://schema.org/Person">
@@ -17,7 +17,9 @@
   {% endif %}
 
   <div class="author__content">
+    {% if author.name %}
     <h3 class="author__name" itemprop="name">{{ author.name }}</h3>
+    {% endif %}
     {% if author.bio %}
       <p class="author__bio" itemprop="description">
         {{ author.bio }}

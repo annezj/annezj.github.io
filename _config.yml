@@ -7,9 +7,9 @@
 
 # Site Settings
 locale                   : "en"
-title                    : "Data Science Blog"
+title                    : "Dr Anne Jones"
 title_separator          : "-"
-name                     : "Anne Jones"
+name                     : # "Dr Anne Jones"
 description              : "Notes and tutorials on modelling, statistics, and data visualisation"
 url                      : https://annezj.github.io/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
@@ -55,7 +55,7 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               :datamagpiuk
+  username               : datamagpiuk
 facebook:
   username               :
   app_id                 :
@@ -77,8 +77,8 @@ analytics:
 
 # Site Author
 author:
-  name             : "Anne Jones"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  name             : #"Dr Anne Jones"
+  avatar           : /assets/images/profile-sml.jpg # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "Mathematical modeller, data scientist and climate impacts researcher"
   location         : "Warrington, UK"
   email            : annezjdat@gmail.com
