@@ -7,20 +7,20 @@
 
 # Site Settings
 locale                   : "en"
-title                    : "Site Title"
+title                    : "Data Science Blog"
 title_separator          : "-"
-name                     : "Your Name"
-description              : "An amazing website."
-url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+name                     : "Anne Jones"
+description              : "Notes and tutorials on modelling, statistics, and data visualisation"
+url                      : https://annezj.github.io/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : annezj/annezj.github.io # GitHub username/repo-name e.g. "annezj/annezj.github.io"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
 comments:
-  provider               : # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
+  provider               : "disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
-    shortname            : # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
+    shortname            : https-annezj-github-io # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
   discourse:
     server               : # https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963 , e.g.: meta.discourse.org
   facebook:
@@ -55,7 +55,7 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               :
+  username               :datamagpiuk
 facebook:
   username               :
   app_id                 :
@@ -77,11 +77,11 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : "Anne Jones"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an amazing person."
-  location         : "Somewhere"
-  email            :
+  bio              : "Mathematical modeller, data scientist and climate impacts researcher"
+  location         : "Warrington, UK"
+  email            : annezjdat@gmail.com
   uri              :
   bitbucket        :
   codepen          :
@@ -89,18 +89,18 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           :
+  github           : annezj
   google_plus      :
   keybase          :
   instagram        :
   lastfm           :
-  linkedin         :
+  linkedin         : anne-jones-58963a112
   pinterest        :
   soundcloud       :
   stackoverflow    : # "123456/username" (the last part of your profile url, e.g. http://stackoverflow.com/users/123456/username)
   steam            :
   tumblr           :
-  twitter          :
+  twitter          : datamagpiuk
   vine             :
   weibo            :
   xing             :
