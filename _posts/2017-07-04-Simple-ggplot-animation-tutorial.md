@@ -49,6 +49,7 @@ ggplot(df)+
   xlab("")
 ```
 
+
 ![]({{site.baseurl}}/assets/images/posts/crime_bar.png)
 
 Now on to the animation, which will have 12 frames. Define the plotting function required by the animation package. This function must create one plot per frame.
