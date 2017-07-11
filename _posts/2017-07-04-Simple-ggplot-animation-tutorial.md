@@ -9,8 +9,18 @@ This example uses crime data from [data.police.uk](https://data.police.uk/), con
 
 The finished animation looks like this:
 
-<script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/crime_animation.js"><i>Here goes my fancy animation</i><br>
-</script>
+
+<script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/jquery-1.4.4.min.js"><br></script>
+<script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/jquery.scianimator.min.js"><br></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"><br></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/languages/r.min.js"><br></script>
+<script>hljs.initHighlightingOnLoad();<br></script>
+<script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/crime_animation.js"><br></script>
+
+<div markdown="0">
+<div class="scianimator"><div id="crime_animation" style="display: inline-block;"></div></div>
+<i>Here goes my fancy animation</i>
+</div></div>
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
