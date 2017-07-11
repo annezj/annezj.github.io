@@ -1,22 +1,24 @@
 ---
-title: Geospatial animations in R with ggplot2 and the animation package
+title: Spatial animations in R with ggplot2 and the animation package
 published: true
 ---
 
-One way to make exportable geospatial animations in R is by using [ggplot2](http://ggplot2.org/) to create static images, and the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to export the stitched images as an animation. Here, I also use [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot the data on a Google Maps background.  
+It's relatively easy to make simple, exportable spatial animations in R using [ggplot2](http://ggplot2.org/) to create static images, and the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to export the stitched images as an animation. Here, I also use [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot the data on a Google Maps background.  
 
-Here, I'm going to animate point data from ...
+In this example I'm going to animate crime data from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during December 2016.
 
 The finished animation looks like this:
 
-First, load the packages and grab the data:
+First, load the packages and data:
 
 ```
 library(ggplot2)
 library(ggmap)
 library(animation)
 
-# read the data: Earthquakes in central Italy in August and September 2016 
-# data were obtained from https://www.kaggle.com/blackecho/italy-earthquakes
-df=read.csv(paste(datadir,'earthquakes.csv',sep=''))
+# Read the data: Crimes in the Liverpool area during December 2016 
+# (Contains public sector information licensed under the Open Government Licence v3.0)
+# Data for Merseyside Police, December 2016 obtained from https://data.police.uk/
+# Grab my edit for Liverpool area and with extraneous columns removed:
+df=read.csv("")
 ```
