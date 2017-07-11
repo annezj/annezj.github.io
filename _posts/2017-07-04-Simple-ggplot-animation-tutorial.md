@@ -1,9 +1,14 @@
 ---
 title: Spatial animations in R with ggplot2 and the animation package
 published: true
+tags:
+ - R
+ - animations
+ - ggplot2
+ - rtutorials
 ---
 
-A relatively easy way to make animations in R, and one that has the advantage of not requiring you to install additional tools, is to use the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to generate an html/javascript wrapper around a sequence of still images. In this example I'm going to demonstrate how to do this by creating a spatial animation, using [ggplot2](http://ggplot2.org/) and [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot geospatial point data on a Google Maps background.  
+One of the simplest ways to make an animation in R is by using the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to generate an html/javascript wrapper around a sequence of still images. In this post I'm going to demonstrate how to create this kind of animation for spatial data using [ggplot2](http://ggplot2.org/) and [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot point data on a Google Maps background.  
 
 Here I've used crime data extracted from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during 2016.
 
