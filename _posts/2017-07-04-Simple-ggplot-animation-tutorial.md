@@ -103,3 +103,5 @@ saveHTML(create.plots(),
 As configured here the html file will appear in the current working directory and open automatically in the default web browser. The html, javascript and css directory structure can then be copied for sharing.
 
 The finished animation looks like [this](https://annezj.github.io/assets/animations/anim-embed.html){:target="_blank"}.
+
+Not the prettiest media player, but good enough for a quick demo that can be run locally or shared without needing to use a public server.
