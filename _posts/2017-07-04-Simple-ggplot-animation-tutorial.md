@@ -20,7 +20,7 @@ The finished animation looks like this:
 
 <div class="scianimator"><div id="crime_animation" style="display: inline-block;"></div></div>
 	<script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/crime_animation.js"></script>
-
+<i>Here goes my fancy animation</i>
 </div>
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
