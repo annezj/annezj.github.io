@@ -7,8 +7,6 @@ A relatively easy way to make animations in R without the need to install additi
 
 This example uses crime data from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during 2016.
 
-The finished animation looks like [this](https://annezj.github.io/assets/animations/anim-embed.html){:target="_blank"}.
-
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
 ```
@@ -24,6 +22,7 @@ df=read.csv("https://github.com/annezj/basic_R_tutorials/raw/master/data/Liverpo
 ```
 
 Next, get a Google Maps background for the area of interest.
+
 ```
 latmin=min(df$Latitude)
 latmax=max(df$Latitude)
@@ -41,7 +40,7 @@ monthstrings=c("January", "February", "March", "April", "May", 					"June", "Jul
                df$monthname=factor(df$monthnum,levels=1:12,labels=monthstrings)
 ```
 
-A quick plots shows us the data has loaded OK and the approximate number of crimes we'll expect to see per category. Also we see an interesting seasonal variation.
+A quick plot shows us the data has loaded OK and the approximate number of crimes we'll expect to see per category. Also we see an interesting seasonal variation.
 
 ```
 ggplot(df)+
@@ -49,5 +48,58 @@ ggplot(df)+
   theme_bw()+ylab("Number of crimes")+
   xlab("")
 ```
+![]({{site.baseurl}}/https://annezj.github.io/assets/images/posts/crime_bar.png)
 
+Now on to the animation, which will have 12 frames. Define the plotting function required by the animation package. This function must create one plot per frame.
 
+```
+create.plots <-function()
+{
+  # Set an frame rate of 1 per second
+  ani.options(interval=1, verbose=FALSE)
+  # animvec is used to loop over frames
+  animvec=1:nframes
+
+  # loop over months/frames
+  for(iframe in animvec)
+  {
+    # Pick up crimes occurring this month
+    dfi=df[which(df$monthnum==iframe),]
+    
+    # Print the base map and title, implement various appearance tweaks
+    titlestr=paste(monthstrings[iframe],'\n',2016,sep='')
+    p=ggmap(mymap)+ggtitle(titlestr)+theme_bw()+
+      theme(plot.title = element_text(hjust = 0.5),text = element_text(size=16))+
+  	theme(axis.title.x=element_blank(),axis.text.x=element_blank(),axis.ticks.x=element_blank())+
+      theme(axis.title.y=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank())
+    
+    # Plot all crimes for this frame
+    p=p+geom_point(data=dfi,aes(x=Longitude,y=Latitude,color=Crime.type), alpha=0.4)
+    
+    # Fix the color scale across all frames so no categories are dropped
+    p=p+scale_color_discrete("", drop=F)
+    
+    # Fix transparency, size of points and spacing on the legend
+    p=p+guides(colour = guide_legend(override.aes = list(alpha = 1, size=4), keyheight = 1.5))
+    print(p)  
+  }
+}
+```
+
+Animate by calling the function to create an html animation from the plotting function.
+
+```
+saveHTML(create.plots(),
+         img.name="crime_animation",
+         autoplay=T,
+         outdir=getwd(),
+         htmlfile=paste("crime_animation.html", sep=""),
+         ani.height=800,ani.width=800,
+         title="Crime Animation",
+         description=c("none")
+)
+```
+
+As configured here the html file will appear in the current working directory and open automatically in the default web browser. The html, javascript and css directory structure can then be copied for sharing.
+
+The finished animation looks like [this](https://annezj.github.io/assets/animations/anim-embed.html){:target="_blank"}.
