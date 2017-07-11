@@ -9,7 +9,7 @@ This example uses crime data from [data.police.uk](https://data.police.uk/), con
 
 The finished animation looks like this:
 
-<iframe src="annezj.github.io/assets/animations/anim-embed.html" width="950" height="950">Animation &quot;anim-embed&quot;</iframe>
+<iframe src="https://annezj.github.io/assets/animations/anim-embed.html" width="500" height="500">Animation &quot;anim-embed&quot;</iframe>
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
