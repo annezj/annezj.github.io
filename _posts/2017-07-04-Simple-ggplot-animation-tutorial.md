@@ -10,7 +10,7 @@ This example uses crime data from [data.police.uk](https://data.police.uk/), con
 The finished animation looks like this:
 
 <script src="https://github.com/annezj/basic_R_tutorials/raw/master/output/crime_animation/js/crime_animation.js"><i>Here goes my fancy animation</i><br>
-
+</script>
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
