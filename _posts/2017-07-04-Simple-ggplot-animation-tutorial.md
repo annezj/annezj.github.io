@@ -7,9 +7,7 @@ A relatively easy way to make animations in R without the need to install additi
 
 This example uses crime data from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during 2016.
 
-The finished animation looks like this:
-
-<iframe src="https://annezj.github.io/assets/animations/anim-embed.html" width="500" height="500">Animation &quot;anim-embed&quot;</iframe>
+The finished animation looks like [this](https://annezj.github.io/assets/animations/anim-embed.html){:target="_blank"}.
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
