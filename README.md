@@ -3,6 +3,8 @@ Forked from https://mmistakes.github.io/minimal-mistakes/
 
 Todo list:
 
--Fix font size issues on live version.
+-Add "About me" page.
+
+-Fix font size issues on live version (seems to be ok now).
 
 -Implement tags.
