@@ -1,6 +1,6 @@
 ---
 title: Spatial animations in R with ggplot2 and the animation package
-published: false
+published: true
 ---
 
 A relatively easy way to make animations in R without the need to install additional tools is by using the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to stitch and export sequences of images as an html/javascript animation. In this example I'm going to demonstrate how to create a spatial animation using [ggplot2](http://ggplot2.org/) and [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot point data on a Google Maps background.  
