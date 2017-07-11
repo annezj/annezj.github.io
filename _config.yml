@@ -79,7 +79,7 @@ analytics:
 author:
   name             : #"Anne Jones"
   avatar           : /assets/images/profile-sml.jpg # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Mathematical modeller, data scientist and climate impacts researcher"
+  bio              : "Notes and tutorials on modelling, statistics, and data visualisation." #"Mathematical modeller, data scientist and climate impacts researcher."
   location         : "Warrington, UK"
   email            : annezjdat@gmail.com
   uri              :
