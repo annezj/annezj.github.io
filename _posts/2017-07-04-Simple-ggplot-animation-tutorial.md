@@ -19,6 +19,35 @@ library(animation)
 # Read the data: Crimes in the Liverpool area during 2016 
 # (Contains public sector information licensed under the Open Government Licence v3.0)
 # Data for Merseyside Police, January to December 2016 obtained from https://data.police.uk/
-# Grab my edit for Liverpool area and with extraneous columns removed:
-df=read.csv("")
+# Grab my edit for Liverpool area with extraneous columns removed:
+df=read.csv("https://github.com/annezj/basic_R_tutorials/raw/master/data/Liverpool-01-2016-12-2016.csv")
 ```
+
+Next, get a Google Maps background for the area of interest.
+```
+latmin=min(df$Latitude)
+latmax=max(df$Latitude)
+lonmin=min(df$Longitude)
+lonmax=max(df$Longitude)
+mymap<-get_map(location=c(lonmin,latmin,lonmax,latmax)) 
+```
+
+The animation will be one frame per month, so process the date string to get month numbers and list month names ready for labelling.
+
+```
+df$monthnum=as.integer(substr(df$Month, 6, 7))
+monthstrings=c("January", "February", "March", "April", "May", 					"June", "July", "August", "September",
+               "October", "November", "December")
+               df$monthname=factor(df$monthnum,levels=1:12,labels=monthstrings)
+```
+
+A quick plots shows us the data has loaded OK and the approximate number of crimes we'll expect to see per category. Also we see an interesting seasonal variation.
+
+```
+ggplot(df)+
+  geom_bar(aes(x=monthname, fill=Crime.type), position="stack")+
+  theme_bw()+ylab("Number of crimes")+
+  xlab("")
+```
+
+
