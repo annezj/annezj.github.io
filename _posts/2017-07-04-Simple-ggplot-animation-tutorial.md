@@ -3,9 +3,9 @@ title: Spatial animations in R with ggplot2 and the animation package
 published: true
 ---
 
-A relatively easy way to make animations in R without the need to install additional tools is by using the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to stitch and export sequences of images as an html/javascript animation. In this example I'm going to demonstrate how to create a spatial animation using [ggplot2](http://ggplot2.org/) and [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot point data on a Google Maps background.  
+A relatively easy way to make animations in R, and one that has the advantage of not requiring you to install additional tools, is to use the [animation](https://cran.r-project.org/web/packages/animation/index.html) package to generate an html/javascript wrapper around a sequence of still images. In this example I'm going to demonstrate how to do this by creating a spatial animation, using [ggplot2](http://ggplot2.org/) and [ggmap](https://cran.r-project.org/web/packages/ggmap/index.html) to plot geospatial point data on a Google Maps background.  
 
-This example uses crime data from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during 2016.
+Here I've used crime data extracted from [data.police.uk](https://data.police.uk/), consisting of date, locations and categories of crimes commited in the Liverpool area during 2016.
 
 First, load the packages and data. The data is in the format of one row per crime, and I've filtered it to include only the columns of interest for this exercise.  
 
@@ -21,7 +21,7 @@ library(animation)
 df=read.csv("https://github.com/annezj/basic_R_tutorials/raw/master/data/Liverpool-01-2016-12-2016.csv")
 ```
 
-Next, get a Google Maps background for the area of interest.
+Next, get a Google Maps background for the region of interest.
 
 ```
 latmin=min(df$Latitude)
@@ -40,7 +40,7 @@ monthstrings=c("January", "February", "March", "April", "May", 					"June", "Jul
                df$monthname=factor(df$monthnum,levels=1:12,labels=monthstrings)
 ```
 
-A quick plot shows us the data has loaded OK and the approximate number of crimes we'll expect to see per category. Also we see an interesting seasonal variation.
+A quick plot confirms the data has loaded correctly and indicates the approximate number of crimes we'll expect to see per category and frame. We also see there's some seasonal variation which is different for different categories.
 
 ```
 ggplot(df)+
@@ -49,10 +49,9 @@ ggplot(df)+
   xlab("")
 ```
 
-
 ![]({{site.baseurl}}/assets/images/posts/crime_bar.png)
 
-Now on to the animation, which will have 12 frames. Define the plotting function required by the animation package. This function must create one plot per frame.
+Now on to the animation, which will have 12 frames: one per month. Define the plotting function required by the animation package. This function must create one plot per frame.
 
 ```
 create.plots <-function()
@@ -88,7 +87,7 @@ create.plots <-function()
 }
 ```
 
-Animate by calling the function to create an html animation from the plotting function.
+Animate by calling the function to create an html animation from the plotting function. (Note that the animation package has functions with very similar syntax to create other animation formats such as .gif, .mp4, but these require additional tools to support the conversion.)
 
 ```
 saveHTML(create.plots(),
@@ -106,4 +105,4 @@ As configured here the html file will appear in the current working directory an
 
 The finished animation looks like [this](https://annezj.github.io/assets/animations/anim-embed.html){:target="_blank"}.
 
-Not the prettiest media player, but good enough for a quick demo that can be run locally or shared without needing to use a public server.
+It's not the prettiest animation wrapper, but good enough for a quick demo that can easily be run locally or shared on the web. Is this the best way to visualise the data? Probably not. It would be much more interesting to aggregate the points by post code or on a raster grid and create a risk map, and of course it would be nice to make the map interactive. I'll return to discuss these in a future post.
