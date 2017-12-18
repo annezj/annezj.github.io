@@ -10,7 +10,7 @@ locale                   : "en"
 title                    : "Dr Anne Jones"
 title_separator          : "-"
 name                     : "Anne Jones"
-description              : "Notes and tutorials on modelling, statistics, and data visualisation"
+description              : "Notes and tutorials on data modelling, statistics, and visualisation"
 url                      : https://annezj.github.io/ # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : annezj/annezj.github.io # GitHub username/repo-name e.g. "annezj/annezj.github.io"
@@ -142,6 +142,7 @@ keep_files:
   - .svn
 encoding: "utf-8"
 markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+show_drafts: false
 
 
 # Conversion

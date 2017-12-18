@@ -1,5 +1,5 @@
 ---
-title: Modelling customer churn (part 1)
+title: Modelling customer churn - Part 1
 published: true
 tags:
  - R
@@ -9,9 +9,9 @@ tags:
 ---
 
 Customer churn is the [loss of customers or clients](https://en.wikipedia.org/wiki/Customer_attrition) and 
-is an example of a 'time-to-event' process; in this case the event is when the customer leaves, for example by terminating their contract. 
+is an example of a 'time-to-event' process: in this case the event is when the customer leaves, for example by terminating their contract. 
 Other examples of events like these which we might want to understand are included human mortality, employee attrition and the failure of engineering 
-components, and the same basic modelling methods can be used in all of them. So not only is it cool that the same maths can be used for such diverse applications, it's potentially a very valuable topic to understand.
+components, and the same basic modelling methods can be used in all of them. So not only is it cool that the same maths can be used for such diverse applications, it's potentially a very valuable topic to understand!
 
 In this series of posts, I'm going to analyse the Telco customer churn dataset available from IBM [here](https://www.ibm.com/communities/analytics/watson-analytics-blog/predictive-insights-in-the-telco-customer-churn-data-set/). 
 
@@ -54,10 +54,7 @@ DeviceProtection TechSupport StreamingTV StreamingMovies Contract PaperlessBilli
 6              Yes          No         Yes             Yes    Month              Yes Electronic\ncheck          99.65            8   Yes 
 ```
 
-This sample data from IBM gives information about a set of customers
-for a fictious telecommunications business, indicating the length of time they've been a customer,
-("tenure", in months), if they left the service within the last month ("Churn" - a binary variable)
-together with 18 other covariates describing each customer.
+This sample data from IBM gives information about a set of customers for a fictious telecommunications business, indicating the length of time they've been a customer, ("tenure", in months), if they left the service within the last month ("Churn" - a binary variable) together with 18 other covariates describing each customer.
 
 Next, tidy up the potential predictor variables. The first column is a customer ID which we will not need.
 
@@ -78,9 +75,10 @@ df.vars$tenure=as.integer(as.character(df.vars$tenure))
 df.vars$MonthlyCharges=as.numeric(as.character(df.vars$MonthlyCharges))
 df.vars$TotalCharges=as.numeric(as.character(df.vars$tenure))
 
-# Check for missing values - no, we're all clear
+# Check for missing values
 sum(is.na(df.vars))
 
+# Nothing appears to be missing, so copy back
 df.tel[,2:20]=df.vars
 ```
 Let's plot a summary of each variable, first the numeric ones and then the categorical ones
@@ -94,6 +92,9 @@ df.tel %>%
 ```
 ![]({{site.baseurl}}/assets/images/posts/churn-variables-categorical.png)
 
+So we have 16 categorical variables, some of which are likely to overlap. Our dataset is fairly evenly gender balanced
+and most customers have a phone service and are not senior citizens.
+
 ```
 df.tel %>%
   keep(is.factor) %>% 
@@ -104,21 +105,22 @@ df.tel %>%
 ```
 ![]({{site.baseurl}}/assets/images/posts/churn-variables-numeric.png)
 
+ Monthly charges look to be a composite of three distributions and total charges seems to just replicate tenure.
+
 ## Survival analysis
 
-Survival analysis is concerned with any "time-to-event" phenomena in a population, where the time to the event of interest is treated as a random variable. A relatively straightforward [mathematical derivation](http://data.princeton.edu/wws509/notes/c7.pdf) shows that the proportion of the population who survive as a function of time, the *survival function*, is 1 - the cumulative distribution function for the time. Note that, in the simplest case, if the instantaneous risk of the event occurring is constant in time, the survival function would be an exponential decay curve. The survival function is useful because we can use it to calculate the probability that any individual survives beyond a specific time, i.e. the probability that the event of interest *does not* occur. 
+[Survival analysis](https://en.wikipedia.org/wiki/Survival_analysis) is concerned with any "time-to-event" phenomena in a population, where the time to the event of interest is treated as a random variable. A relatively straightforward [mathematical derivation](http://data.princeton.edu/wws509/notes/c7.pdf) shows that the proportion of the population who survive as a function of time, the *survival function*, is 1 minus the cumulative distribution function for the time. Note that, in the simplest case, if the instantaneous risk of the event occurring is constant in time, the survival function would be an exponential decay curve. The survival function is useful because we can use it to calculate the probability that any individual survives beyond a specific time, i.e. the probability that the event of interest *does not* occur. 
 
 A complication of survival analysis is that data are typically incomplete; we may have data recorded over a certain period,
 and therefore do not follow all individuals in the dataset until the event occurs for them. For these individuals, the
-times are "right-censored," which means that we know the time-to-event is above a certain length of time, but not exactly how long.
-But knowing these individuals have not yet (in this case) churned, is informative, and discarding them from the analysis might bias our results.
+times are "right-censored," which means that we know the time-to-event is greater than a certain length of time, but not exactly how long it is. But knowing these individuals have not yet (in this case) churned, *is* informative, and discarding them from the analysis might bias our results.
 
 Luckily, the [Kaplan-Meier estimator](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator)
 provides a method of including information for both those individuals for which we have a record of 
 the event occurring, and those for which we only have right-censored data.
  
-To better understand exactly how the K-M estimator works, I'd recommend working through the simple examples presented 
-[here] (http://www.itl.nist.gov/div898/handbook/apr/section2/apr215.htm) and [here] (http://www.pmean.com/08/SimpleKm.html).
+To better understand exactly how the K-M estimator works, I'd recommend working through the simple and nice examples presented 
+[here](http://www.itl.nist.gov/div898/handbook/apr/section2/apr215.htm) and [here](http://www.pmean.com/08/SimpleKm.html).
 Kaplan-Meier is not the only method for surivial analysis, and requires exact times, but has the advantage of being non-parametric; it is fitted empirically without making any assumptions about the distribution of the data.
 
 Let's plot a quick K-M survival curve on all the data.
@@ -150,12 +152,12 @@ ggsurvplot(fit2, data=df.tel, risk.table=T, conf.int = T,
            break.time.by=12, ggtheme=theme_bw(),
            censor.shape=124, conf.int.alpha=0.3,
            ylim=c(0.5,1.0),xlab='Tenure (months)',ylab='Probability of remaining')
-``
+```
 ![]({{site.baseurl}}/assets/images/posts/churn-surv2.png)
 
 We see that senior citizens churn more quickly than other customers. To determine if the rates are significantly different,
 we can use the p-value obtained from the Log Rank test, which gives us the probability of obtaining these results if there
-was no difference between the two groups (senior citizens or not).
+was no difference in churn between populations who are senior citizens and those who are not.
 
 ```
 survdiff(survival ~ SeniorCitizen, data = df.tel)
@@ -168,9 +170,10 @@ SeniorCitizen=1 1142      476      309      89.8       109
 
  Chisq= 110  on 1 degrees of freedom, p= 0 
 ```
-So, as expected, p is so low it's reported as zero. But how much faster do senior citizens churn than the rest of the population?
-To answer this we need to turn to another technique, the [Cox proportional hazards model](https://en.wikipedia.org/wiki/Proportional_hazards_model),
-which is a regression method to quantify how hazard rates (the churn rate in this example) across covariates.
+So, as we might expect from the survival curves there is a significant difference between the populations divided according
+to this category, and in fact p is so low it's reported as zero. But how much faster do senior citizens churn than the rest of the population?
+
+To answer this we can turn to another traditional survival analysis technique, the [Cox proportional hazards model](https://en.wikipedia.org/wiki/Proportional_hazards_model), which is a regression method to quantify how hazard rates (the churn rate in this example) vary across covariates.
 
 ```
 fit.cox<-coxph(survival~SeniorCitizen, data=df.tel)
@@ -184,8 +187,7 @@ SeniorCitizen1 0.5474    1.7287   0.0531 10.3 <2e-16
 Likelihood ratio test=96.6  on 1 df, p=0
 n= 7043, number of events= 1869 
 ```
-Here, we see that the p values for SeniorCitizen=1 is statistically significant, and that the churn rate coefficient multiplier,
-exp(coef) is 1.73: indicating senior citizens churn at a rate 1.7 times faster than the population.
+Here, we see that the p values for the SeniorCitizen category is statistically significant, and that the churn rate coefficient multiplier, exp(coef) is 1.73, indicating senior citizens churn at a rate 1.7 times faster than the population.
 
 However, Cox regression assumes proportional hazards; that the relationship between churn rates
 can be represented by a linear function. If this assumption does not hold, the results may be misleading. We can 
@@ -193,18 +195,19 @@ test for non-proportional hazards by considering if the residuals of the regress
 
 ```
 cox.zph(fit.cox)
+                 rho chisq        p
+SeniorCitizen1 0.099  18.3 1.89e-05
+
 plot(cox.zph(fit.cox))
 ```
 
-![]({{site.baseurl}}/assets/images/posts/cox-zph-SC.png)
+![]({{site.baseurl}}/assets/images/posts/cox-zph-SC.png){:height="400px" width="400px"}
 
 
 We see that the residuals are flat between approximately 1.5 to 3.2 months and around 30 to 40 months,
-but overall, they vary with time. The p-value in the test here indicates that the residuals are significantly a function of tenure,
-and that consequently the proportional model does not apply. For this dataset, it turns out that the proportional hazards
-assumption is violated for many of the potential predictors, and that therefore this approach is of limited use.
+but overall, they vary with time. The p-value of 1.89e-05 in the test here indicates that the residuals are significantly a function of tenure,and that consequently the proportional model does not apply. For this dataset, it turns out that the proportional hazards assumption is violated for many of the potential predictors, and that therefore this approach is of limited use.
 
-What else can we say about the covariates? We can fit K-M curves for each categorical covariate in turn and see which has the biggest effect.
+What else can we say about the covariates? At this stage in data exploration I always condone taking the simplest possible approach. In this case we can fit K-M curves for each categorical covariate in turn. 
 
 ```
 vars.cat=colnames(df.vars %>%keep(is.factor))
@@ -216,6 +219,11 @@ for(icat in 1:length(vars.cat))
   tmp=data.frame(variable=vars.cat[icat], chisq=diff$chisq, p=p)
   log.rank.cat=rbind(log.rank.cat, tmp)
 }
+```
+
+Now, order by p value, from most to least significant.
+
+```
 log.rank.cat[order(log.rank.cat$p, decreasing = F),]
            variable        chisq             p
 14         Contract 2352.8725383  0.000000e+00
@@ -236,20 +244,24 @@ log.rank.cat[order(log.rank.cat$p, decreasing = F),]
 5      PhoneService    0.4308186  5.115875e-01
 ```
 
-So all covariates with the exception of gender and PhoneService produce curves which are significantly different amongst categories
-at <1%, and contract looks to have the largest effect.
+So all covariates with the exception of gender and PhoneService produce curves which are significantly different amongst categories at <1%, with Contract, OnlineSecurity and TechSupport having the most signficant effects on churn rate. Let's 
+look at the survival curves for Contract:
 
 ```
 fit3 <- survfit(survival ~ Contract, data = df.tel)
-ggsurvplot(fit3, data=df.tel, risk.table=T, conf.int = T, 
+ggsurvplot(fit3, data=df.tel, risk.table=F, conf.int = T, 
            break.time.by=12, ggtheme=theme_bw(),
-           censor.shape=124, conf.int.alpha=0.3,xlim=c(0,25),
+           censor.shape=124, conf.int.alpha=0.3,
            break.x.by=1,
            ylim=c(0.5,1.0),xlab='Tenure (months)',ylab='Probability of remaining')
 ```
 ![]({{site.baseurl}}/assets/images/posts/churn-surv3.png)
 
+Yes, the effect there certainly appears to be large for montly customers, with a 10% churn after just one month. 
+Customers on one and two year contracts churn much more sedately.
+
 What about the numerical variables?
+
 ```
 coxph(formula = survival ~ MonthlyCharges, data = df.tel)
 Call:
@@ -261,12 +273,15 @@ MonthlyCharges 0.006158  1.006177 0.000787 7.83 4.9e-15
 Likelihood ratio test=63.5  on 1 df, p=1.55e-15
 n= 7043, number of events= 1869 
 ```
-So a $1 increase in Monthly charges increases churn slightly (by 0.6%) and this is statistically significant.
-It also turns out that Total Charges is just a linear function of tenure, so this covariate can be removed
+
+This shows us that a $1 increase in Monthly charges increases churn slightly (by 0.6%) and this is statistically significant.
+It also turns out that, as we saw from the distributions, TotalCharges is just a linear function of tenure, so this covariate can be removed.
 
 Finally, let's take a closer look at churn probabilities for different categories, and
 calculate the probability of churn conditional upon category values
-Use chain rule of probability, P(Churn/A)=P(Churn, A)/P(A).
+
+Use the chain rule of probability, P(Churn/A)=P(Churn, A)/P(A).
+
 We can calculate this for each covariate and see which seems to have to largest effect.
 
 ```
@@ -292,10 +307,10 @@ ggplot(df.freq)+geom_bar(aes(x=x, y=freq, fill=variable), stat='identity')+theme
 
 ![]({{site.baseurl}}/assets/images/posts/churn-probability.png)
 
-Just inspecting the plots, we can see that the largest differences between category values occurs for
-Contract=monthly, Payment method=Electronic Check, OnlineSecurity=No, TechSupport=No, which are exactly the most
-statistically significant covariates we found in the survival analysis above. So if we want to reduce churn, we would probably
-want to looks at customers falling into these categories first.
+Just by inspecting the plots, we can see that the largest churn probabilities (compared to other category values) are associated with customers on monthly contracts, paying by electronic check, with no online security and no use of tech support, which are exactly the most statistically significant covariates we found in the survival analysis above. So if we want to reduce churn, we would probably want to looks at customers falling into these categories first.
 
-What about predicting customers at risk of churning? You may have spotted that the conditional probabilities I've plotted here 
-are exactly what is calculated to create a Naive Bayes classification model. In the next post, I'll compare a few different methods to create a predictive model of customer churn.
+In this analysis we've seen that by exploring the data and fitting survival curves we've discovered that that churn rate for this
+dataset is not constant but varies according to tenure, and we've seen which categories of customers are most likely to churn.
+
+So we have some population-level understanding of churn for this data. But can we predict which individual customers are at highest risk of churning? You may have spotted that the conditional probabilities I've calculated above are exactly what is calculated in a Naive Bayes classification model. In the next post, I'll compare a few different classfication methods to 
+create a predictive model of customer churn.
