@@ -30,8 +30,8 @@ library(ggplot2)
 # survival fitting and plotting
 library(survival)
 library(survminer)
-# Load the TELCO customer churn data from .csv file converted from the downloaded file:
-df.tel=fread("./data/WA_Fn-UseC_-Telco-Customer-Chur-Table 1.csv", data.table=F)
+# Load the TELCO customer churn data from my .csv file conversion here:
+df.tel=fread("https://github.com/annezj/basic_R_tutorials/raw/master/data/WA_Fn-UseC_-Telco-Customer-Chur-Table 1.csv", data.table=F)
 
 head(df.tel[,1:11])
 
