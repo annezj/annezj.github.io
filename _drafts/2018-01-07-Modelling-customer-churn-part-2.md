@@ -41,7 +41,7 @@ df.tel$contract_expired[which(df.tel$Contract=="Month" & df.tel$tenure>=1)]=T
 df.tel$contract_expired[which(df.tel$Contract=="One year" & df.tel$tenure>=12)]=T
 df.tel$contract_expired[which(df.tel$Contract=="Two year" & df.tel$tenure>=24)]=T
 ```
-We should also bear in mind that the data are not balanced: 
+We should also check for class imbalance, since it is likely that the numbers churned and not churned are unequal: 
 
 ```
 table(df.tel$Churn)/nrow(df.tel)
@@ -49,7 +49,7 @@ table(df.tel$Churn)/nrow(df.tel)
        No       Yes 
 0.7346301 0.2653699 
 ```
-Only 27% of customers churned, so we may need to introduce some sampling at the training stage to avoid biased results. 
+We see 27% of customers churned, so there is some class imbalance, but it is not extreme.(You can read more about techniques to correct class imbalance [here](https://svds.com/learning-imbalanced-classes/)). For imbalances at a rate of around 0.1 or lower we would need to consider techniques to address the imbalance when fitting models. For now, we'll use the data as it is.
 
 Next we load the caret library and split our data into training and test sets:
 
@@ -67,7 +67,7 @@ three models: 1) Naive Bayes (simple model we started to explore via plots last 
 
 Note that we mainly have categorical predictors, which Caret will automatically convert to dummy variables (a single binary variable for each category value) during fitting.
 
-I prefer to use the ROC area as the performance metric so I set this up ready for fitting, also specifying repeated cross validation
+I prefer to use the area under the [ROC curve](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) as the performance metric so I set this up ready for fitting, also specifying repeated cross validation
 with 10 folds and repeated 3 times in order to fit the reglularization parameters.
 
 ```
@@ -78,8 +78,7 @@ metric = "ROC"
 preProcess=c("center", "scale")
 
 ```
-Fit the three methods to the training set. Note the random forest model is slow due to the cross-validation, so if you have problems
-reduce the number of repeats or use a smaller training set.
+Fit the three methods to the training set. Note the random forest model is slow due to the cross-validation, so if you have problems reduce the number of repeats or use a smaller training set.
 
 ```
 # GLMNET - logistic regression with regularisation
@@ -93,7 +92,9 @@ set.seed(seed)
 fit.rf <- train(Churn~., data=train_data, method="rf", metric=metric, preProc=preProc, trControl=control)
 
 ```
-Compare performance on the test set using ROC area under the curve. To get full predictive power from the classifier it's important to get the probability from the predictions, and not just use the raw results which will predict a binary response based on probabilities above or below 0.5.
+Compare performance on the test set using ROC area under the curve. To get full predictive power from the classifier it's important to get the probability from the predictions, and not just use the raw results which will predict a binary response based on probabilities above or below 0.5. The pROC library also gives an estimate of the 95% confidence interval
+on the ROC using bootrap resampling.
+
 
 ```
 library(pROC)
@@ -106,28 +107,45 @@ for (name in c("glmnet", "nb", "rf"))
   predictions=predict(fit, test_data, type="prob")
   roc.obj=roc(test_data$Churn=="Yes", predictions$Yes)
   aucval=auc(roc.obj)[1]
-  compare=rbind(compare, data.frame(model=name, auc=aucval))
+  compare=rbind(compare, data.frame(model=name, auc=auc(roc.obj)[1], 
+                                                auc.lci95=ci.auc(roc.obj)[1],
+                                                auc.uci95=ci.auc(roc.obj)[3]))
   rocs[[i]]=roc.obj
   i=i+1
 }
-compare
-ggroc(rocs)+scale_color_discrete("model")
+print(compare, digits=3)
+model   auc auc.lci95 auc.uci95
+1 glmnet 0.836     0.813     0.858
+2     nb 0.810     0.784     0.835
+3     rf 0.814     0.789     0.840
 
-
-model       auc
-1 glmnet 0.8356457
-2     nb 0.8095439
-3     rf 0.8142382
 
 ```
+Using the pROC library, we can also plot the ROC curve for the three models, which shows 1-specificity, or the false positive rate (x), plotting against the sensitivity or hit rate (y). The black line shows
+the performance expected if the forecast consisted of the same probability for all customers, which would give a ROC area of 0.5. A perfect forecast would have a false positive rate of zero (specificity of 1) and a sensitivity of 1: all the data points would be clustered at (1,1) on the plot, giving a ROC area of 1. Therefore the greater the area between the black line and the ROC curve for each model, the more skilful the prediction from that particular model.
 
-So the regularised logistic regression model comes out top, and performs better than the simplest naive bayes method and the slow random forest model.
+```
+ggroc(rocs)+scale_color_discrete("model", labels=modelnames)+theme_bw()+
+  geom_segment(data=data.frame(x=1, y=0, xend=0, yend=1), 
+               aes(x=x, y=y, xend=xend, yend=yend), color='black')
+```
+
+({{site.baseurl}}/assets/images/posts/churn-variables-categorical.png)
+
+So the regularised logistic regression model comes out top, and performs better than the simplest (unregularised) naive bayes method but also better than the random forest model. We also see from the overlap of the confidence intervals and the ROC plot that there is not so much difference between the models, but glmnet does look a little better. The ROC area tells us the probability that, two randomly selected customers, one from each category, the probability that the classification model will assign the greater probability of churn to the one that did in fact churn. So, for our best model this ability to distingiush churned customers is around 0.84, and this is significantly better than a non-informative forecast (AUC of 0.5) at 95% confidence.
+
+Let's examine the best model fit a little more.
+
+```
+coeff=predict(fit.glmnet$finalModel, type = "coefficients", 
+                            s=fit.glmnet$bestTune$lambda)
+coeff=data.frame(name=coeff@Dimnames[1], value=coeff@x)
+colnames(coeff)=c('name','value')
+coeff[order(abs(coeff$value), decreasing = T),]
+varImp(fit.glmnet)
+```
 
 
-
-
-
-
-Next, we compare different methods to account for the class imbalance mentioned earlier. (Read ore about class imbalance [here](https://svds.com/learning-imbalanced-classes/)). Again, Caret has a number of options. The simplest two are undersampling and oversampling, both of which have disadvantages. Undersampling randomly undersamples the majority class (in this case those who did not churn), therefore discarding some data. Oversampling resamples the minority class (in this case those who churned), therefore assigning more weight to the minority class values. More sophisticated methods are also available, one of the most well known of which is [SMOTE](https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume16/chawla02a-html/chawla2002.html) (Synthetic Minority Oversampling TEchnique), which combines majority class undersampling with minority class oversampling, and generates new minority samples by interpolating existing ones. We'll include it here, along with the two simpler methods.
+To improve the model fit further, we could go back 
 
 
