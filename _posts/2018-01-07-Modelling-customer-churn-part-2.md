@@ -4,12 +4,14 @@ published: true
 tags:
  - R
  - churn
- - survival analyis
  - classification
+ - machine learning
+ - learning curves
+ - ROC
 ---
 The [first of this series of posts](https://annezj.github.io//Modelling-customer-churn-part-1/) introduced the concept of customer churn as time-to-event process, and carried out some preliminary data exploration, and survival analysis for the [Telco customer dataset from IBM](https://www.ibm.com/communities/analytics/watson-analytics-blog/predictive-insights-in-the-telco-customer-churn-data-set/). 
 
-In this second post I'm going to move on to fitting some classification models to the dataset to see how well we can predict which customers are at risk of churning based on the information we have anout them. 
+In this second post I'm going to move on to fitting some classification models to the dataset to see how well we can predict which customers are at risk of churning based on the information we have about them. 
 
 Assuming you're continuing from last time, you should have a cleaned data frame with 20 covariates in addition to the class variable "Churn":
 
@@ -33,7 +35,7 @@ Last time, we saw that the first covariate is an ID number which we can discard.
 df.tel=df.tel[,c(2:19, 21)]
 ```
 We also saw that contract had the largest effect on churn rate, and that the curves were discontinuous over the contract expiry
-time. Therefore, it may be helpful to include contract expiry as an additional predictor. (Note that when fitting a predictive model you should ideally split your data and retain an independent test set before looking at the data and doing feature engineering).
+time. Therefore, it may be helpful to include contract expiry as an additional predictor. (Note that when fitting a predictive model you should ideally split your data then carry out feature engineering using only the training set).
 
 ```
 df.tel$contract_expired=F
@@ -130,22 +132,103 @@ ggroc(rocs)+scale_color_discrete("model", labels=modelnames)+theme_bw()+
                aes(x=x, y=y, xend=xend, yend=yend), color='black')
 ```
 
-({{site.baseurl}}/assets/images/posts/churn-variables-categorical.png)
+![]({{site.baseurl}}/assets/images/posts/churn-roc-std.png){:height="300px" width="450px"}
 
-So the regularised logistic regression model comes out top, and performs better than the simplest (unregularised) naive bayes method but also better than the random forest model. We also see from the overlap of the confidence intervals and the ROC plot that there is not so much difference between the models, but glmnet does look a little better. The ROC area tells us the probability that, two randomly selected customers, one from each category, the probability that the classification model will assign the greater probability of churn to the one that did in fact churn. So, for our best model this ability to distingiush churned customers is around 0.84, and this is significantly better than a non-informative forecast (AUC of 0.5) at 95% confidence.
 
-Let's examine the best model fit a little more.
+So the regularised logistic regression model GLMnet comes out top, and performs better than the simplest (unregularised) Naive Bayes method but also better than the Random Forest model. We also see from the overlap of the confidence intervals and the ROC plot that there is not so much difference between the models, but glmnet does look a little better. The ROC area tells us the probability that, two randomly selected customers, one from each category, the probability that the classification model will assign the greater probability of churn to the one that did in fact churn. So, for our best model this ability to distingiush churned customers is around 0.84, and this is significantly better than a non-informative forecast (AUC of 0.5) at 95% confidence.
+
+We can use the caret function "learing_curve_data" to plot the learning curve for the models, to tell us if we'd expect a better fit with more data. Let's do this for the GLMnet model:
+
+```
+# Get dummy predictor vars first
+dmy = dummyVars(" ~ .", data = train_data[,1:(ncol(train_data)-1)])
+dmy.df = data.frame(predict(dmy, newdata = train_data))
+dmy.df=cbind(dmy.df, data.frame(Churn=factor(train_data$Churn)))
+lcd=learing_curve_dat(dat=dmy.df, 
+                      outcome="Churn",method="glmnet",
+                      metric=metric, trControl=trainControl(
+                        classProbs=T, summaryFunction = twoClassSummary))
+
+ggplot(lcd, aes(x = Training_Size, y = ROC, color = Data)) + 
+  geom_smooth(method = loess, span = .8) + 
+  theme_bw()
+```
+
+![]({{site.baseurl}}/assets/images/posts/learning-curve-glmnet.png){:height="300px" width="450px"}
+
+We see that error in the model is increasing (i.e. ROC decreases), and the training and resampling errors are changing roughly in parallel. So the model is suffering from bias rather than variance, and more data (from the same distribution) would not likely produce a better-performing and generalisable model. For more on learning, curves, I'd recommend the useful notes [here](http://www.ritchieng.com/machinelearning-learning-curve/).
+
+
+Finally, let's examine the best model fit a little more. For the glmnet model, the coefficients show us the direction of the effect on the churn probability: positive coefficients mean an increased probability of churn and negative coefficients a decreased probability of churn. We can also extract the variable importance from the model fit and rank the predictors.
 
 ```
 coeff=predict(fit.glmnet$finalModel, type = "coefficients", 
                             s=fit.glmnet$bestTune$lambda)
-coeff=data.frame(name=coeff@Dimnames[1], value=coeff@x)
-colnames(coeff)=c('name','value')
-coeff[order(abs(coeff$value), decreasing = T),]
+coeff
+(Intercept)                    -1.599677889
+genderMale                      .          
+SeniorCitizen1                  0.048102160
+PartnerYes                     -0.007105372
+DependentsYes                  -0.078127959
+tenure                         -0.813825921
+PhoneServiceYes                -0.067878763
+MultipleLinesNo service         0.049543026
+MultipleLinesYes                0.126742101
+InternetServiceFiber optic      0.474371645
+InternetServiceNo              -0.043437030
+OnlineSecurityNo service       -0.043160968
+OnlineSecurityYes              -0.133554832
+OnlineBackupNo service         -0.043969565
+OnlineBackupYes                -0.029928087
+DeviceProtectionNo service     -0.046420652
+DeviceProtectionYes             .          
+TechSupportNo service          -0.046329617
+TechSupportYes                 -0.150521863
+StreamingTVNo service          -0.046892263
+StreamingTVYes                  0.101179746
+StreamingMoviesNo service      -0.042586260
+StreamingMoviesYes              0.119301524
+ContractOne year               -0.253784260
+ContractTwo year               -0.516323995
+PaperlessBillingYes             0.137929191
+PaymentMethodCredit\ncard      -0.012673556
+PaymentMethodElectronic\ncheck  0.172840007
+PaymentMethodMailed\ncheck      .          
+MonthlyCharges                  .          
+contract_expiredTRUE            0.139496261
+
 varImp(fit.glmnet)
+glmnet variable importance
+
+  only 20 most important variables shown (out of 30)
+
+                               Overall
+tenure                         100.000
+ContractTwo year                63.444
+InternetServiceFiber optic      58.289
+ContractOne year                31.184
+PaymentMethodElectronic\ncheck  21.238
+TechSupportYes                  18.496
+contract_expiredTRUE            17.141
+PaperlessBillingYes             16.948
+OnlineSecurityYes               16.411
+MultipleLinesYes                15.574
+StreamingMoviesYes              14.659
+StreamingTVYes                  12.433
+DependentsYes                    9.600
+PhoneServiceYes                  8.341
+MultipleLinesNo service          6.088
+SeniorCitizen1                   5.911
+StreamingTVNo service            5.762
+DeviceProtectionNo service       5.704
+TechSupportNo service            5.693
+OnlineBackupNo service           5.403
 ```
 
+So 30 variables were retained in the model, with the five most important being tenure (decrease probability of churning), contract of two years (decrease probability of churning), fiber optic internet (increase probability of churning) contract of one year (decrease probability of churning) and payment method of electronic check (increase probability of churning).
 
-To improve the model fit further, we could go back 
 
+At this point, you might want to check these results against the [IBM analysis using Watson Analytics](https://www.ibm.com/communities/analytics/watson-analytics-blog/predictive-insights-in-the-telco-customer-churn-data-set/). They find "Contract, Internet Service, Tenure, and Total Charges are the most important factors," exactly as we have found, although they don't appear to have spotted that Total Charges and Tenure are exactly the same thing, which just shows you should always plot your raw data!
+
+This classification analysis has moved us beyond simply identifying risk factors to quantifying the predictive power of the covariate information held on customers in terms of indentifying those at risk of churning. However, with this simple approach we are predicting who is at risk of churning for the time snapshot of the dataset. In reality, if we are to take action based on model predictions, we need a prediction of churn risk which is a function of both invariant customer characteristics, and time. This is a more challenging problem which I'll return to discuss in the third and final post in this series. 
 
